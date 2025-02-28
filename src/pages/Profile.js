@@ -13,7 +13,11 @@ import {
   Legend,
 } from "chart.js";
 import SkillsRadarChart from "../components/SkillsRadarChart";
-import { GET_USER_INFO, GET_AUDIT_RATIO } from "../graphql/queries";
+import {
+  GET_USER_INFO,
+  GET_AUDIT_RATIO,
+  GET_LATEST_PROGRESS,
+} from "../graphql/queries";
 
 // Register Chart.js components
 ChartJS.register(
@@ -37,57 +41,9 @@ const ProfileContainer = styled.div`
 
 const Header = styled.header`
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
   padding: 10px 0;
-`;
-
-const Title = styled.h1`
-  font-size: 20px;
-  color: ${(props) => (props.darkMode ? "#fff" : "#333")};
-  margin: 0;
-  font-weight: 500;
-`;
-
-const HeaderControls = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const ThemeToggle = styled.button`
-  background-color: transparent;
-  color: ${(props) => (props.darkMode ? "#fff" : "#333")};
-  border: 1px solid ${(props) => (props.darkMode ? "#333" : "#e0e0e0")};
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0;
-  font-size: 18px;
-
-  &:hover {
-    background-color: ${(props) => (props.darkMode ? "#333" : "#f0f0f0")};
-  }
-`;
-
-const LogoutButton = styled.button`
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 5px 12px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background-color: #d32f2f;
-  }
 `;
 
 const DashboardGrid = styled.div`
@@ -108,10 +64,10 @@ const DashboardGrid = styled.div`
 `;
 
 const Card = styled.div`
-  background-color: ${(props) => (props.darkMode ? "#1e1e1e" : "white")};
+  background-color: ${(props) => (props.darkMode ? "#121212" : "white")};
   border: 1px solid ${(props) => (props.darkMode ? "#333" : "#e0e0e0")};
-  border-radius: 4px;
-  padding: 15px;
+  border-radius: 8px;
+  padding: 20px;
   overflow: hidden;
   box-shadow: 0 2px 4px
     ${(props) =>
@@ -126,17 +82,17 @@ const Card = styled.div`
   }
 
   @media (max-width: 768px) {
-    padding: 12px;
+    padding: 15px;
   }
 
   @media (max-width: 480px) {
-    padding: 10px;
+    padding: 12px;
   }
 `;
 
 const CardTitle = styled.h3`
-  font-size: 14px;
-  color: ${(props) => (props.darkMode ? "#6b8afd" : "#2575fc")};
+  font-size: 16px;
+  color: ${(props) => (props.darkMode ? "#a78bfa" : "#2575fc")};
   margin: 0 0 15px 0;
   font-weight: 500;
   border-bottom: 1px solid ${(props) => (props.darkMode ? "#333" : "#eee")};
@@ -186,7 +142,7 @@ const UserName = styled.h2`
 
 const UserDetail = styled.p`
   font-size: 13px;
-  color: ${(props) => (props.darkMode ? "#aaa" : "#666")};
+  color: ${(props) => (props.darkMode ? "#a0a0a0" : "#666")};
   margin: 5px 0;
 `;
 
@@ -198,7 +154,7 @@ const AuditMetric = styled.div`
 
 const MetricLabel = styled.span`
   font-size: 13px;
-  color: ${(props) => (props.darkMode ? "#aaa" : "#666")};
+  color: ${(props) => (props.darkMode ? "#a0a0a0" : "#666")};
 `;
 
 const MetricValue = styled.span`
@@ -225,14 +181,14 @@ const Progress = styled.div`
 const RatioValue = styled.div`
   font-size: 36px;
   font-weight: bold;
-  color: ${(props) => (props.darkMode ? "#f0c14b" : "#333")};
+  color: ${(props) => (props.darkMode ? "#a78bfa" : "#2575fc")};
   text-align: center;
   margin: 15px 0 5px;
 `;
 
 const RatioLabel = styled.div`
   font-size: 14px;
-  color: ${(props) => (props.darkMode ? "#f0c14b" : "#ffa726")};
+  color: ${(props) => (props.darkMode ? "#a78bfa" : "#2575fc")};
   text-align: center;
   text-transform: lowercase;
 `;
@@ -273,7 +229,7 @@ const ChartWrapper = styled.div`
 
 const SkillsDescription = styled.p`
   font-size: 13px;
-  color: ${(props) => (props.darkMode ? "#aaa" : "#666")};
+  color: ${(props) => (props.darkMode ? "#a0a0a0" : "#666")};
   margin: 5px 0 15px 0;
 `;
 
@@ -284,7 +240,7 @@ const SeeMoreButton = styled.button`
   gap: 5px;
   background: transparent;
   border: none;
-  color: ${(props) => (props.darkMode ? "#6b8afd" : "#2575fc")};
+  color: ${(props) => (props.darkMode ? "#a78bfa" : "#2575fc")};
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -293,17 +249,125 @@ const SeeMoreButton = styled.button`
   transition: transform 0.2s;
 
   &:hover {
-    color: ${(props) => (props.darkMode ? "#8ba5ff" : "#1a5dc8")};
+    color: ${(props) => (props.darkMode ? "#c4b5fd" : "#1a5dc8")};
     transform: translateX(3px);
   }
 `;
 
 const ChartTitle = styled.h4`
   font-size: 14px;
-  color: ${(props) => (props.darkMode ? "#ddd" : "#555")};
+  color: ${(props) => (props.darkMode ? "#fff" : "#333")};
   margin: 0 0 10px 0;
   text-align: center;
   font-weight: 500;
+`;
+
+const WhatsUpCard = styled(Card)`
+  margin-top: 20px;
+  padding: 25px;
+  width: 100%;
+`;
+
+const WhatsUpTitle = styled.h2`
+  font-size: 32px;
+  color: ${(props) => (props.darkMode ? "#a78bfa" : "#2575fc")};
+  margin: 0 0 15px 0;
+  font-weight: 500;
+`;
+
+const ResumeLink = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+
+  svg {
+    color: ${(props) => (props.darkMode ? "#a78bfa" : "#2575fc")};
+    margin-right: 10px;
+  }
+`;
+
+const ResumeText = styled.span`
+  color: ${(props) => (props.darkMode ? "#a0a0a0" : "#666")};
+  margin-right: 10px;
+  font-size: 14px;
+`;
+
+const ResumeButton = styled.a`
+  background: transparent;
+  border: none;
+  color: ${(props) => (props.darkMode ? "#a78bfa" : "#2575fc")};
+  text-decoration: underline;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: monospace;
+
+  &:hover {
+    color: ${(props) => (props.darkMode ? "#c4b5fd" : "#1a5dc8")};
+  }
+`;
+
+const NoProjectText = styled.span`
+  color: ${(props) => (props.darkMode ? "#a0a0a0" : "#666")};
+  font-style: italic;
+  font-size: 14px;
+`;
+
+// Add these new styled components for the sidebar
+const MainLayout = styled.div`
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+`;
+
+const ContentArea = styled.div`
+  flex: 1;
+  padding: 20px;
+  background-color: ${(props) => (props.darkMode ? "#121212" : "#f5f7fa")};
+  color: ${(props) => (props.darkMode ? "#fff" : "#333")};
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+`;
+
+const Sidebar = styled.div`
+  width: 70px;
+  background-color: ${(props) => (props.darkMode ? "#1e1e1e" : "#ffffff")};
+  border-left: 1px solid ${(props) => (props.darkMode ? "#333" : "#e0e0e0")};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+`;
+
+const SidebarButton = styled.button`
+  background-color: transparent;
+  color: ${(props) => (props.darkMode ? "#fff" : "#333")};
+  border: 1px solid ${(props) => (props.darkMode ? "#333" : "#e0e0e0")};
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  font-size: 18px;
+  margin-bottom: 20px;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: ${(props) => (props.darkMode ? "#333" : "#f0f0f0")};
+    transform: scale(1.05);
+  }
+`;
+
+const LogoutSidebarButton = styled(SidebarButton)`
+  margin-top: auto;
+  background-color: ${(props) => (props.darkMode ? "#2a2a2a" : "#f5f5f5")};
+  color: ${(props) => (props.darkMode ? "#f44336" : "#f44336")};
+  border-color: ${(props) => (props.darkMode ? "#3a3a3a" : "#e0e0e0")};
+
+  &:hover {
+    background-color: ${(props) => (props.darkMode ? "#3a3a3a" : "#fafafa")};
+  }
 `;
 
 const Profile = () => {
@@ -325,6 +389,13 @@ const Profile = () => {
     loading: auditLoading,
     error: auditError,
   } = useQuery(GET_AUDIT_RATIO);
+
+  // Fetch latest progress data
+  const {
+    data: progressData,
+    loading: progressLoading,
+    error: progressError,
+  } = useQuery(GET_LATEST_PROGRESS);
 
   const handleLogout = () => {
     logout();
@@ -401,6 +472,22 @@ const Profile = () => {
       .replace(",", "");
   };
 
+  // Format project path to show only the last part
+  const formatProjectPath = (path) => {
+    if (!path) return "";
+
+    // Remove "/bahrain/bh-module" prefix
+    let formattedPath = path.replace("/bahrain/bh-module/", "");
+
+    // If path starts with "bahrain\", extract just the last part
+    if (path.startsWith("bahrain\\") || path.startsWith("bahrain/")) {
+      const parts = path.split(/[\\\/]/); // Split by both \ and /
+      formattedPath = parts[parts.length - 1];
+    }
+
+    return formattedPath;
+  };
+
   // Update chart options based on theme
   const getChartOptions = (isDarkMode) => {
     return {
@@ -453,180 +540,320 @@ const Profile = () => {
     };
   };
 
+  // Get the latest project from progress data
+  const latestProgress = progressData?.user[0]?.progresses[0];
+
   // Loading state
-  if (userLoading || auditLoading) {
+  if (userLoading || auditLoading || progressLoading) {
     return (
-      <ProfileContainer darkMode={darkMode}>
-        <Header>
-          <Title darkMode={darkMode}>GraphQL</Title>
-          <HeaderControls>
-            <ThemeToggle darkMode={darkMode} onClick={toggleTheme}>
-              {darkMode ? "☀️" : "🌙"}
-            </ThemeToggle>
-            <LogoutButton onClick={handleLogout}>logout</LogoutButton>
-          </HeaderControls>
-        </Header>
-        <div>Loading profile data...</div>
-      </ProfileContainer>
+      <MainLayout>
+        <ContentArea darkMode={darkMode}>
+          <Header>{/* Title and logo removed */}</Header>
+          <div
+            style={{ color: "#a0a0a0", fontSize: "16px", marginTop: "20px" }}
+          >
+            Loading profile data...
+          </div>
+        </ContentArea>
+        <Sidebar darkMode={darkMode}>
+          <SidebarButton darkMode={darkMode} onClick={toggleTheme}>
+            {darkMode ? "☀️" : "🌙"}
+          </SidebarButton>
+          <LogoutSidebarButton darkMode={darkMode} onClick={handleLogout}>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M16 17L21 12L16 7"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M21 12H9"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </LogoutSidebarButton>
+        </Sidebar>
+      </MainLayout>
     );
   }
 
   // Error state
-  if (userError || auditError) {
+  if (userError || auditError || progressError) {
     return (
-      <ProfileContainer darkMode={darkMode}>
-        <Header>
-          <Title darkMode={darkMode}>GraphQL</Title>
-          <HeaderControls>
-            <ThemeToggle darkMode={darkMode} onClick={toggleTheme}>
-              {darkMode ? "☀️" : "🌙"}
-            </ThemeToggle>
-            <LogoutButton onClick={handleLogout}>logout</LogoutButton>
-          </HeaderControls>
-        </Header>
-        <div>Error loading profile data. Please try again later.</div>
-      </ProfileContainer>
+      <MainLayout>
+        <ContentArea darkMode={darkMode}>
+          <Header>{/* Title and logo removed */}</Header>
+          <div
+            style={{ color: "#a0a0a0", fontSize: "16px", marginTop: "20px" }}
+          >
+            Error loading profile data. Please try again later.
+          </div>
+        </ContentArea>
+        <Sidebar darkMode={darkMode}>
+          <SidebarButton darkMode={darkMode} onClick={toggleTheme}>
+            {darkMode ? "☀️" : "🌙"}
+          </SidebarButton>
+          <LogoutSidebarButton darkMode={darkMode} onClick={handleLogout}>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M16 17L21 12L16 7"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M21 12H9"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </LogoutSidebarButton>
+        </Sidebar>
+      </MainLayout>
     );
   }
 
+  // Main content
   return (
-    <ProfileContainer darkMode={darkMode}>
-      <Header>
-        <Title darkMode={darkMode}>GraphQL</Title>
-        <HeaderControls>
-          <ThemeToggle darkMode={darkMode} onClick={toggleTheme}>
-            {darkMode ? "☀️" : "🌙"}
-          </ThemeToggle>
-          <LogoutButton onClick={handleLogout}>logout</LogoutButton>
-        </HeaderControls>
-      </Header>
+    <MainLayout>
+      <ContentArea darkMode={darkMode}>
+        <Header>{/* Title and logo removed */}</Header>
 
-      <DashboardGrid>
-        {/* Personal Details Card */}
-        <PersonalDetailsCard darkMode={darkMode}>
-          <CardTitle darkMode={darkMode}>Personal Details</CardTitle>
-          <UserInfo>
-            <UserName darkMode={darkMode}>
-              {userData?.user[0]?.login || "User"}
-            </UserName>
-          </UserInfo>
-          <UserDetail darkMode={darkMode}>
-            Account Created At:{" "}
-            {formatDate(userData?.user[0]?.createdAt) || "Not available"}
-          </UserDetail>
-          <UserDetail darkMode={darkMode}>
-            Email: {userData?.user[0]?.email || "Not available"}
-          </UserDetail>
-          <UserDetail darkMode={darkMode}>
-            Username: {userData?.user[0]?.login || "Not available"}
-          </UserDetail>
-        </PersonalDetailsCard>
+        <DashboardGrid>
+          {/* Personal Details Card */}
+          <PersonalDetailsCard darkMode={darkMode}>
+            <CardTitle darkMode={darkMode}>Personal Details</CardTitle>
+            <UserInfo>
+              <UserName darkMode={darkMode}>
+                {userData?.user[0]?.login || "User"}
+              </UserName>
+            </UserInfo>
+            <UserDetail darkMode={darkMode}>
+              Account Created At:{" "}
+              {formatDate(userData?.user[0]?.createdAt) || "Not available"}
+            </UserDetail>
+            <UserDetail darkMode={darkMode}>
+              Email: {userData?.user[0]?.email || "Not available"}
+            </UserDetail>
+            <UserDetail darkMode={darkMode}>
+              Username: {userData?.user[0]?.login || "Not available"}
+            </UserDetail>
+          </PersonalDetailsCard>
 
-        {/* Audit Ratio Card */}
-        <AuditRatioCard darkMode={darkMode}>
-          <CardTitle darkMode={darkMode}>Audit Ratio</CardTitle>
-          <AuditMetric>
-            <MetricLabel darkMode={darkMode}>Done</MetricLabel>
-            <MetricValue darkMode={darkMode}>
-              {formatBytes(auditsDone)}
-            </MetricValue>
-          </AuditMetric>
-          <ProgressBar darkMode={darkMode}>
-            <Progress percentage={donePercentage} color="#4caf50" />
-          </ProgressBar>
+          {/* Audit Ratio Card */}
+          <AuditRatioCard darkMode={darkMode}>
+            <CardTitle darkMode={darkMode}>Audit Ratio</CardTitle>
+            <AuditMetric>
+              <MetricLabel darkMode={darkMode}>Done</MetricLabel>
+              <MetricValue darkMode={darkMode}>
+                {formatBytes(auditsDone)}
+              </MetricValue>
+            </AuditMetric>
+            <ProgressBar darkMode={darkMode}>
+              <Progress percentage={donePercentage} color="#4caf50" />
+            </ProgressBar>
 
-          <AuditMetric>
-            <MetricLabel darkMode={darkMode}>Received</MetricLabel>
-            <MetricValue darkMode={darkMode}>
-              {formatBytes(auditsReceived)}
-            </MetricValue>
-          </AuditMetric>
-          <ProgressBar darkMode={darkMode}>
-            <Progress percentage={receivedPercentage} color="#ffa726" />
-          </ProgressBar>
+            <AuditMetric>
+              <MetricLabel darkMode={darkMode}>Received</MetricLabel>
+              <MetricValue darkMode={darkMode}>
+                {formatBytes(auditsReceived)}
+              </MetricValue>
+            </AuditMetric>
+            <ProgressBar darkMode={darkMode}>
+              <Progress percentage={receivedPercentage} color="#ffa726" />
+            </ProgressBar>
 
-          <RatioValue darkMode={darkMode}>{auditRatio}</RatioValue>
-          <RatioLabel darkMode={darkMode}>{ratioStatus}</RatioLabel>
-        </AuditRatioCard>
+            <RatioValue darkMode={darkMode}>{auditRatio}</RatioValue>
+            <RatioLabel darkMode={darkMode}>{ratioStatus}</RatioLabel>
+          </AuditRatioCard>
 
-        {/* User Skills Card */}
-        <UserSkillsCard darkMode={darkMode}>
-          <CardTitle darkMode={darkMode}>Best skills</CardTitle>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <SkillsDescription darkMode={darkMode}>
-              Here are your skills with the highest completion rate among all
-              categories.
-            </SkillsDescription>
-            <SeeMoreButton darkMode={darkMode} onClick={toggleExpandSkills}>
-              {expandedSkills ? "See less" : "See more"}
-              {expandedSkills ? "↑" : "→"}
-            </SeeMoreButton>
-          </div>
+          {/* User Skills Card */}
+          <UserSkillsCard darkMode={darkMode}>
+            <CardTitle darkMode={darkMode}>Best skills</CardTitle>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <SkillsDescription darkMode={darkMode}>
+                Here are your skills with the highest completion rate among all
+                categories.
+              </SkillsDescription>
+              <SeeMoreButton darkMode={darkMode} onClick={toggleExpandSkills}>
+                {expandedSkills ? "See less" : "See more"}
+                {expandedSkills ? "↑" : "→"}
+              </SeeMoreButton>
+            </div>
 
-          {!expandedSkills ? (
-            <SkillsChartContainer expanded={false}>
-              <SkillsRadarChart
-                skillsFilter={[
-                  "prog",
-                  "go",
-                  "back-end",
-                  "front-end",
-                  "js",
-                  "html",
-                ]}
-                darkMode={darkMode}
-                chartOptions={getChartOptions(darkMode)}
-              />
-            </SkillsChartContainer>
-          ) : (
-            <SkillsChartContainer expanded={true}>
-              <div>
-                <ChartTitle darkMode={darkMode}>Programming Skills</ChartTitle>
-                <ChartWrapper>
-                  <SkillsRadarChart
-                    skillsFilter={[
-                      "prog",
-                      "algo",
-                      "game",
-                      "stats",
-                      "tcp",
-                      "back-end",
-                      "front-end",
-                    ]}
-                    darkMode={darkMode}
-                    chartOptions={getChartOptions(darkMode)}
-                  />
-                </ChartWrapper>
-              </div>
-              <div>
-                <ChartTitle darkMode={darkMode}>Technology Skills</ChartTitle>
-                <ChartWrapper>
-                  <SkillsRadarChart
-                    skillsFilter={[
-                      "go",
-                      "js",
-                      "html",
-                      "css",
-                      "sql",
-                      "docker",
-                      "unix",
-                    ]}
-                    darkMode={darkMode}
-                    chartOptions={getChartOptions(darkMode)}
-                  />
-                </ChartWrapper>
-              </div>
-            </SkillsChartContainer>
+            {!expandedSkills ? (
+              <SkillsChartContainer expanded={false}>
+                <SkillsRadarChart
+                  skillsFilter={[
+                    "prog",
+                    "go",
+                    "back-end",
+                    "front-end",
+                    "js",
+                    "html",
+                  ]}
+                  darkMode={darkMode}
+                  chartOptions={getChartOptions(darkMode)}
+                />
+              </SkillsChartContainer>
+            ) : (
+              <SkillsChartContainer expanded={true}>
+                <div>
+                  <ChartTitle darkMode={darkMode}>
+                    Programming Skills
+                  </ChartTitle>
+                  <ChartWrapper>
+                    <SkillsRadarChart
+                      skillsFilter={[
+                        "prog",
+                        "algo",
+                        "game",
+                        "stats",
+                        "tcp",
+                        "back-end",
+                        "front-end",
+                      ]}
+                      darkMode={darkMode}
+                      chartOptions={getChartOptions(darkMode)}
+                    />
+                  </ChartWrapper>
+                </div>
+                <div>
+                  <ChartTitle darkMode={darkMode}>Technology Skills</ChartTitle>
+                  <ChartWrapper>
+                    <SkillsRadarChart
+                      skillsFilter={[
+                        "go",
+                        "js",
+                        "html",
+                        "css",
+                        "sql",
+                        "docker",
+                        "unix",
+                      ]}
+                      darkMode={darkMode}
+                      chartOptions={getChartOptions(darkMode)}
+                    />
+                  </ChartWrapper>
+                </div>
+              </SkillsChartContainer>
+            )}
+          </UserSkillsCard>
+        </DashboardGrid>
+
+        <WhatsUpCard darkMode={darkMode}>
+          <WhatsUpTitle darkMode={darkMode}>What's up</WhatsUpTitle>
+          <ResumeLink darkMode={darkMode}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+            <ResumeText darkMode={darkMode}>Resume</ResumeText>
+            {latestProgress ? (
+              <ResumeButton darkMode={darkMode} href="#">
+                {formatProjectPath(latestProgress.path)}
+              </ResumeButton>
+            ) : (
+              <NoProjectText darkMode={darkMode}>No projects yet</NoProjectText>
+            )}
+          </ResumeLink>
+          {latestProgress && (
+            <UserDetail
+              darkMode={darkMode}
+              style={{ marginTop: "5px", marginLeft: "26px" }}
+            >
+              Last updated: {formatDate(latestProgress.createdAt)}
+            </UserDetail>
           )}
-        </UserSkillsCard>
-      </DashboardGrid>
-    </ProfileContainer>
+        </WhatsUpCard>
+      </ContentArea>
+      <Sidebar darkMode={darkMode}>
+        <SidebarButton darkMode={darkMode} onClick={toggleTheme}>
+          {darkMode ? "☀️" : "🌙"}
+        </SidebarButton>
+        <LogoutSidebarButton darkMode={darkMode} onClick={handleLogout}>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M16 17L21 12L16 7"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M21 12H9"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </LogoutSidebarButton>
+      </Sidebar>
+    </MainLayout>
   );
 };
 

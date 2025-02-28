@@ -99,3 +99,16 @@ export const GET_USER_SKILLS = gql`
     }
   }
 `;
+
+// Query to get user's latest progress for the "What's up" card
+export const GET_LATEST_PROGRESS = gql`
+  query GetLatestProgress {
+    user {
+      progresses(order_by: { updatedAt: desc }, limit: 1) {
+        path
+        createdAt
+        grade
+      }
+    }
+  }
+`;
