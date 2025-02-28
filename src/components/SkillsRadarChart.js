@@ -43,7 +43,11 @@ const ErrorContainer = styled.div`
   color: #f44336;
 `;
 
-const SkillsRadarChart = () => {
+const SkillsRadarChart = ({
+  skillsFilter = ["prog", "go", "back-end", "front-end", "js", "html"],
+  darkMode = false,
+  chartOptions = null,
+}) => {
   // Fetch skills data
   const {
     data: skillsData,
@@ -95,16 +99,16 @@ const SkillsRadarChart = () => {
 
     console.log("Found skills:", skillsMap);
 
-    // Convert to array format for the skills component
+    // Convert to array format for the skills component, but only include specified skills
     return Object.entries(skillsMap)
+      .filter(([name]) => skillsFilter.includes(name))
       .map(([name, data]) => ({
         name,
         // Use the amount directly as a percentage
         level: data.amount,
         createdAt: data.createdAt,
       }))
-      .sort((a, b) => b.level - a.level) // Sort by level descending
-      .slice(0, 8); // Take top 8 skills
+      .sort((a, b) => b.level - a.level); // Sort by level descending
   };
 
   // Process skills data
@@ -139,37 +143,43 @@ const SkillsRadarChart = () => {
         label: "Skill Level",
         data: processedSkills.map((skill) => skill.level),
         fill: true,
-        backgroundColor: "rgba(37, 117, 252, 0.2)",
-        borderColor: "rgb(37, 117, 252)",
-        pointBackgroundColor: "rgb(37, 117, 252)",
-        pointBorderColor: "#fff",
-        pointHoverBackgroundColor: "#fff",
-        pointHoverBorderColor: "rgb(37, 117, 252)",
+        backgroundColor: darkMode
+          ? "rgba(107, 138, 253, 0.2)"
+          : "rgba(37, 117, 252, 0.2)",
+        borderColor: darkMode ? "rgb(107, 138, 253)" : "rgb(37, 117, 252)",
+        pointBackgroundColor: darkMode
+          ? "rgb(107, 138, 253)"
+          : "rgb(37, 117, 252)",
+        pointBorderColor: darkMode ? "#333" : "#fff",
+        pointHoverBackgroundColor: darkMode ? "#333" : "#fff",
+        pointHoverBorderColor: darkMode
+          ? "rgb(107, 138, 253)"
+          : "rgb(37, 117, 252)",
       },
     ],
   };
 
-  // Chart options
-  const options = {
+  // Use provided chart options or default ones
+  const options = chartOptions || {
     scales: {
       r: {
         angleLines: {
           display: true,
-          color: "#e0e0e0",
+          color: darkMode ? "#333" : "#e0e0e0",
         },
         grid: {
-          color: "#e0e0e0",
+          color: darkMode ? "#333" : "#e0e0e0",
         },
         pointLabels: {
           font: {
             size: 12,
           },
-          color: "#333",
+          color: darkMode ? "#ddd" : "#333",
         },
         suggestedMin: 0,
-        suggestedMax: 100, // Set to 100 for percentage scale
+        suggestedMax: 100,
         ticks: {
-          display: false, // Hide the tick labels (20, 40, 60, 80, 100)
+          display: false,
           stepSize: 20,
           backdropColor: "transparent",
         },
@@ -180,16 +190,18 @@ const SkillsRadarChart = () => {
         display: false,
       },
       tooltip: {
-        backgroundColor: "rgba(255, 255, 255, 0.9)",
-        titleColor: "#333",
-        bodyColor: "#666",
-        borderColor: "#e0e0e0",
+        backgroundColor: darkMode
+          ? "rgba(30, 30, 30, 0.9)"
+          : "rgba(255, 255, 255, 0.9)",
+        titleColor: darkMode ? "#fff" : "#333",
+        bodyColor: darkMode ? "#ddd" : "#666",
+        borderColor: darkMode ? "#444" : "#e0e0e0",
         borderWidth: 1,
         padding: 10,
         boxPadding: 3,
         callbacks: {
           label: function (context) {
-            return `${context.raw}%`; // Add % to tooltip values
+            return `${context.raw}%`;
           },
         },
       },

@@ -10,31 +10,27 @@ const LoginContainer = styled.div`
   justify-content: center;
   min-height: 100vh;
   padding: 20px;
-  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  background-color: #0d1117;
+  color: #c9d1d9;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
 `;
 
 const LoginCard = styled.div`
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  padding: 40px;
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  padding: 32px;
   width: 100%;
-  max-width: 400px;
+  max-width: 380px;
 `;
 
 const Title = styled.h1`
-  color: #333;
-  margin-bottom: 10px;
+  color: #f0f6fc;
+  margin-bottom: 32px;
   text-align: center;
   font-size: 28px;
-`;
-
-const Subtitle = styled.h2`
-  color: #666;
-  margin-bottom: 30px;
-  text-align: center;
-  font-size: 16px;
-  font-weight: normal;
+  font-weight: 400;
 `;
 
 const Form = styled.form`
@@ -48,60 +44,66 @@ const FormGroup = styled.div`
 
 const Label = styled.label`
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   font-weight: 500;
-  color: #555;
+  color: #c9d1d9;
+  font-size: 15px;
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
-  transition: border-color 0.3s;
+  padding: 8px 14px;
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: 15px;
+  line-height: 22px;
+  height: 38px;
+  transition: border-color 0.2s;
 
   &:focus {
-    border-color: #2575fc;
+    border-color: #58a6ff;
     outline: none;
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
   }
 `;
 
 const Button = styled.button`
-  background-color: #2575fc;
+  background-color: #238636;
   color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 12px;
-  font-size: 16px;
+  border: 1px solid rgba(240, 246, 252, 0.1);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s;
-  margin-top: 10px;
+  transition: background-color 0.2s;
+  width: 100%;
+  height: 40px;
+  margin-top: 24px;
 
   &:hover {
-    background-color: #1a65e0;
+    background-color: #2ea043;
   }
 
   &:disabled {
-    background-color: #a0a0a0;
+    background-color: #238636;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 `;
 
 const ErrorMessage = styled.div`
-  color: #e74c3c;
-  margin-top: 15px;
+  color: #f85149;
+  margin-top: 20px;
   text-align: center;
   font-size: 14px;
   white-space: pre-wrap;
-`;
-
-const InfoText = styled.p`
-  color: #666;
-  font-size: 14px;
-  margin-top: 5px;
-  font-style: italic;
+  background-color: rgba(248, 81, 73, 0.1);
+  border: 1px solid rgba(248, 81, 73, 0.4);
+  border-radius: 6px;
+  padding: 10px;
 `;
 
 const Login = () => {
@@ -162,8 +164,7 @@ const Login = () => {
           if (
             errorMessage.includes("User does not exist or password incorrect")
           ) {
-            errorMessage =
-              "Invalid username/email or password. Please check your credentials and try again.";
+            errorMessage = "Incorrect username or password.";
           }
         }
 
@@ -179,13 +180,11 @@ const Login = () => {
 
   return (
     <LoginContainer>
+      <Title>Sign in to GraphQL</Title>
       <LoginCard>
-        <Title>Reboot01 Profile</Title>
-        <Subtitle>Sign in to view your learning progress</Subtitle>
-
         <Form onSubmit={handleSubmit}>
           <FormGroup>
-            <Label htmlFor="identifier">Username or Email</Label>
+            <Label htmlFor="identifier">Username or email address</Label>
             <Input
               type="text"
               id="identifier"
@@ -193,12 +192,8 @@ const Login = () => {
               value={formData.identifier}
               onChange={handleChange}
               required
-              placeholder="Enter your username or email"
+              autoFocus
             />
-            <InfoText>
-              Use your Reboot01 learning platform credentials to log in. You can
-              use either your username or email address.
-            </InfoText>
           </FormGroup>
 
           <FormGroup>
@@ -210,12 +205,11 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              placeholder="Enter your password"
             />
           </FormGroup>
 
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Logging in..." : "Log In"}
+            {isLoading ? "Signing in..." : "Sign in"}
           </Button>
 
           {error && <ErrorMessage>{error}</ErrorMessage>}

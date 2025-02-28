@@ -13,12 +13,7 @@ import {
   Legend,
 } from "chart.js";
 import SkillsRadarChart from "../components/SkillsRadarChart";
-import {
-  GET_USER_INFO,
-  GET_USER_XP,
-  GET_USER_PROGRESS,
-  GET_AUDIT_RATIO,
-} from "../graphql/queries";
+import { GET_USER_INFO, GET_AUDIT_RATIO } from "../graphql/queries";
 
 // Register Chart.js components
 ChartJS.register(
@@ -30,22 +25,14 @@ ChartJS.register(
   Legend
 );
 
-// Light theme styling
+// Theme styling
 const ProfileContainer = styled.div`
   width: 100%;
   min-height: 100vh;
   padding: 20px;
-  background-color: #f5f7fa;
-  color: #333;
+  background-color: ${(props) => (props.darkMode ? "#121212" : "#f5f7fa")};
+  color: ${(props) => (props.darkMode ? "#fff" : "#333")};
   font-family: "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-
-  @media (max-width: 768px) {
-    padding: 15px;
-  }
-
-  @media (max-width: 480px) {
-    padding: 10px;
-  }
 `;
 
 const Header = styled.header`
@@ -58,7 +45,7 @@ const Header = styled.header`
 
 const Title = styled.h1`
   font-size: 20px;
-  color: #333;
+  color: ${(props) => (props.darkMode ? "#fff" : "#333")};
   margin: 0;
   font-weight: 500;
 `;
@@ -71,8 +58,8 @@ const HeaderControls = styled.div`
 
 const ThemeToggle = styled.button`
   background-color: transparent;
-  color: #333;
-  border: 1px solid #e0e0e0;
+  color: ${(props) => (props.darkMode ? "#fff" : "#333")};
+  border: 1px solid ${(props) => (props.darkMode ? "#333" : "#e0e0e0")};
   border-radius: 50%;
   width: 36px;
   height: 36px;
@@ -82,10 +69,9 @@ const ThemeToggle = styled.button`
   cursor: pointer;
   padding: 0;
   font-size: 18px;
-  transition: background-color 0.2s;
 
   &:hover {
-    background-color: #f0f0f0;
+    background-color: ${(props) => (props.darkMode ? "#333" : "#f0f0f0")};
   }
 `;
 
@@ -122,12 +108,22 @@ const DashboardGrid = styled.div`
 `;
 
 const Card = styled.div`
-  background-color: white;
-  border: 1px solid #e0e0e0;
+  background-color: ${(props) => (props.darkMode ? "#1e1e1e" : "white")};
+  border: 1px solid ${(props) => (props.darkMode ? "#333" : "#e0e0e0")};
   border-radius: 4px;
   padding: 15px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px
+    ${(props) =>
+      props.darkMode ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.05)"};
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px
+      ${(props) =>
+        props.darkMode ? "rgba(0, 0, 0, 0.5)" : "rgba(0, 0, 0, 0.1)"};
+  }
 
   @media (max-width: 768px) {
     padding: 12px;
@@ -140,10 +136,10 @@ const Card = styled.div`
 
 const CardTitle = styled.h3`
   font-size: 14px;
-  color: #2575fc;
+  color: ${(props) => (props.darkMode ? "#6b8afd" : "#2575fc")};
   margin: 0 0 15px 0;
   font-weight: 500;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid ${(props) => (props.darkMode ? "#333" : "#eee")};
   padding-bottom: 8px;
 `;
 
@@ -183,14 +179,14 @@ const UserInfo = styled.div`
 
 const UserName = styled.h2`
   font-size: 18px;
-  color: #333;
+  color: ${(props) => (props.darkMode ? "#fff" : "#333")};
   margin: 0 0 5px 0;
   font-weight: 500;
 `;
 
 const UserDetail = styled.p`
   font-size: 13px;
-  color: #666;
+  color: ${(props) => (props.darkMode ? "#aaa" : "#666")};
   margin: 5px 0;
 `;
 
@@ -202,19 +198,19 @@ const AuditMetric = styled.div`
 
 const MetricLabel = styled.span`
   font-size: 13px;
-  color: #666;
+  color: ${(props) => (props.darkMode ? "#aaa" : "#666")};
 `;
 
 const MetricValue = styled.span`
   font-size: 13px;
-  color: #333;
+  color: ${(props) => (props.darkMode ? "#fff" : "#333")};
   font-weight: 500;
 `;
 
 const ProgressBar = styled.div`
   height: 4px;
   width: 100%;
-  background-color: #f0f0f0;
+  background-color: ${(props) => (props.darkMode ? "#333" : "#f0f0f0")};
   border-radius: 2px;
   margin-bottom: 12px;
   overflow: hidden;
@@ -229,23 +225,42 @@ const Progress = styled.div`
 const RatioValue = styled.div`
   font-size: 36px;
   font-weight: bold;
-  color: #333;
+  color: ${(props) => (props.darkMode ? "#f0c14b" : "#333")};
   text-align: center;
   margin: 15px 0 5px;
 `;
 
 const RatioLabel = styled.div`
   font-size: 14px;
-  color: #ffa726;
+  color: ${(props) => (props.darkMode ? "#f0c14b" : "#ffa726")};
   text-align: center;
   text-transform: lowercase;
 `;
 
 const SkillsChartContainer = styled.div`
   width: 100%;
-  height: 300px;
   position: relative;
   margin-top: 10px;
+  display: ${(props) => (props.expanded ? "grid" : "block")};
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  height: ${(props) => (props.expanded ? "auto" : "300px")};
+  min-height: ${(props) => (props.expanded ? "400px" : "300px")};
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    min-height: ${(props) => (props.expanded ? "700px" : "280px")};
+  }
+
+  @media (max-width: 480px) {
+    min-height: ${(props) => (props.expanded ? "600px" : "250px")};
+  }
+`;
+
+const ChartWrapper = styled.div`
+  height: 300px;
+  width: 100%;
+  position: relative;
 
   @media (max-width: 768px) {
     height: 280px;
@@ -258,14 +273,44 @@ const SkillsChartContainer = styled.div`
 
 const SkillsDescription = styled.p`
   font-size: 13px;
-  color: #666;
+  color: ${(props) => (props.darkMode ? "#aaa" : "#666")};
   margin: 5px 0 15px 0;
+`;
+
+const SeeMoreButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  color: ${(props) => (props.darkMode ? "#6b8afd" : "#2575fc")};
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 5px 10px;
+  margin-left: auto;
+  transition: transform 0.2s;
+
+  &:hover {
+    color: ${(props) => (props.darkMode ? "#8ba5ff" : "#1a5dc8")};
+    transform: translateX(3px);
+  }
+`;
+
+const ChartTitle = styled.h4`
+  font-size: 14px;
+  color: ${(props) => (props.darkMode ? "#ddd" : "#555")};
+  margin: 0 0 10px 0;
+  text-align: center;
+  font-weight: 500;
 `;
 
 const Profile = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const [darkMode, setDarkMode] = React.useState(false);
+  const [darkMode, setDarkMode] = React.useState(true);
+  const [expandedSkills, setExpandedSkills] = React.useState(false);
 
   // Fetch user info
   const {
@@ -273,20 +318,6 @@ const Profile = () => {
     loading: userLoading,
     error: userError,
   } = useQuery(GET_USER_INFO);
-
-  // Fetch XP data
-  const {
-    data: xpData,
-    loading: xpLoading,
-    error: xpError,
-  } = useQuery(GET_USER_XP);
-
-  // Fetch progress data
-  const {
-    data: progressData,
-    loading: progressLoading,
-    error: progressError,
-  } = useQuery(GET_USER_PROGRESS);
 
   // Fetch audit ratio data
   const {
@@ -302,6 +333,10 @@ const Profile = () => {
 
   const toggleTheme = () => {
     setDarkMode(!darkMode);
+  };
+
+  const toggleExpandSkills = () => {
+    setExpandedSkills(!expandedSkills);
   };
 
   // Calculate audit metrics
@@ -366,14 +401,66 @@ const Profile = () => {
       .replace(",", "");
   };
 
+  // Update chart options based on theme
+  const getChartOptions = (isDarkMode) => {
+    return {
+      scales: {
+        r: {
+          angleLines: {
+            display: true,
+            color: isDarkMode ? "#333" : "#e0e0e0",
+          },
+          grid: {
+            color: isDarkMode ? "#333" : "#e0e0e0",
+          },
+          pointLabels: {
+            font: {
+              size: 12,
+            },
+            color: isDarkMode ? "#ddd" : "#333",
+          },
+          suggestedMin: 0,
+          suggestedMax: 100,
+          ticks: {
+            display: false,
+            stepSize: 20,
+            backdropColor: "transparent",
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+        tooltip: {
+          backgroundColor: isDarkMode
+            ? "rgba(30, 30, 30, 0.9)"
+            : "rgba(255, 255, 255, 0.9)",
+          titleColor: isDarkMode ? "#fff" : "#333",
+          bodyColor: isDarkMode ? "#ddd" : "#666",
+          borderColor: isDarkMode ? "#444" : "#e0e0e0",
+          borderWidth: 1,
+          padding: 10,
+          boxPadding: 3,
+          callbacks: {
+            label: function (context) {
+              return `${context.raw}%`;
+            },
+          },
+        },
+      },
+      maintainAspectRatio: false,
+    };
+  };
+
   // Loading state
-  if (userLoading || xpLoading || progressLoading || auditLoading) {
+  if (userLoading || auditLoading) {
     return (
-      <ProfileContainer>
+      <ProfileContainer darkMode={darkMode}>
         <Header>
-          <Title>GraphQL</Title>
+          <Title darkMode={darkMode}>GraphQL</Title>
           <HeaderControls>
-            <ThemeToggle onClick={toggleTheme}>
+            <ThemeToggle darkMode={darkMode} onClick={toggleTheme}>
               {darkMode ? "☀️" : "🌙"}
             </ThemeToggle>
             <LogoutButton onClick={handleLogout}>logout</LogoutButton>
@@ -385,13 +472,13 @@ const Profile = () => {
   }
 
   // Error state
-  if (userError || xpError || progressError || auditError) {
+  if (userError || auditError) {
     return (
-      <ProfileContainer>
+      <ProfileContainer darkMode={darkMode}>
         <Header>
-          <Title>GraphQL</Title>
+          <Title darkMode={darkMode}>GraphQL</Title>
           <HeaderControls>
-            <ThemeToggle onClick={toggleTheme}>
+            <ThemeToggle darkMode={darkMode} onClick={toggleTheme}>
               {darkMode ? "☀️" : "🌙"}
             </ThemeToggle>
             <LogoutButton onClick={handleLogout}>logout</LogoutButton>
@@ -403,11 +490,11 @@ const Profile = () => {
   }
 
   return (
-    <ProfileContainer>
+    <ProfileContainer darkMode={darkMode}>
       <Header>
-        <Title>GraphQL</Title>
+        <Title darkMode={darkMode}>GraphQL</Title>
         <HeaderControls>
-          <ThemeToggle onClick={toggleTheme}>
+          <ThemeToggle darkMode={darkMode} onClick={toggleTheme}>
             {darkMode ? "☀️" : "🌙"}
           </ThemeToggle>
           <LogoutButton onClick={handleLogout}>logout</LogoutButton>
@@ -415,57 +502,128 @@ const Profile = () => {
       </Header>
 
       <DashboardGrid>
-        {/* Personal Details Card - Using real data from query */}
-        <PersonalDetailsCard>
-          <CardTitle>Personal Details</CardTitle>
+        {/* Personal Details Card */}
+        <PersonalDetailsCard darkMode={darkMode}>
+          <CardTitle darkMode={darkMode}>Personal Details</CardTitle>
           <UserInfo>
-            <UserName>{userData?.user[0]?.login || "User"}</UserName>
+            <UserName darkMode={darkMode}>
+              {userData?.user[0]?.login || "User"}
+            </UserName>
           </UserInfo>
-          <UserDetail>
+          <UserDetail darkMode={darkMode}>
             Account Created At:{" "}
             {formatDate(userData?.user[0]?.createdAt) || "Not available"}
           </UserDetail>
-          <UserDetail>
+          <UserDetail darkMode={darkMode}>
             Email: {userData?.user[0]?.email || "Not available"}
           </UserDetail>
-          <UserDetail>
+          <UserDetail darkMode={darkMode}>
             Username: {userData?.user[0]?.login || "Not available"}
           </UserDetail>
         </PersonalDetailsCard>
 
         {/* Audit Ratio Card */}
-        <AuditRatioCard>
-          <CardTitle>Audit Ratio</CardTitle>
+        <AuditRatioCard darkMode={darkMode}>
+          <CardTitle darkMode={darkMode}>Audit Ratio</CardTitle>
           <AuditMetric>
-            <MetricLabel>Done</MetricLabel>
-            <MetricValue>{formatBytes(auditsDone)}</MetricValue>
+            <MetricLabel darkMode={darkMode}>Done</MetricLabel>
+            <MetricValue darkMode={darkMode}>
+              {formatBytes(auditsDone)}
+            </MetricValue>
           </AuditMetric>
-          <ProgressBar>
+          <ProgressBar darkMode={darkMode}>
             <Progress percentage={donePercentage} color="#4caf50" />
           </ProgressBar>
 
           <AuditMetric>
-            <MetricLabel>Received</MetricLabel>
-            <MetricValue>{formatBytes(auditsReceived)}</MetricValue>
+            <MetricLabel darkMode={darkMode}>Received</MetricLabel>
+            <MetricValue darkMode={darkMode}>
+              {formatBytes(auditsReceived)}
+            </MetricValue>
           </AuditMetric>
-          <ProgressBar>
+          <ProgressBar darkMode={darkMode}>
             <Progress percentage={receivedPercentage} color="#ffa726" />
           </ProgressBar>
 
-          <RatioValue>{auditRatio}</RatioValue>
-          <RatioLabel>{ratioStatus}</RatioLabel>
+          <RatioValue darkMode={darkMode}>{auditRatio}</RatioValue>
+          <RatioLabel darkMode={darkMode}>{ratioStatus}</RatioLabel>
         </AuditRatioCard>
 
-        {/* User Skills Card - Using the self-contained SkillsRadarChart component */}
-        <UserSkillsCard>
-          <CardTitle>Best skills</CardTitle>
-          <SkillsDescription>
-            Here are your skills with the highest completion rate among all
-            categories.
-          </SkillsDescription>
-          <SkillsChartContainer>
-            <SkillsRadarChart />
-          </SkillsChartContainer>
+        {/* User Skills Card */}
+        <UserSkillsCard darkMode={darkMode}>
+          <CardTitle darkMode={darkMode}>Best skills</CardTitle>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <SkillsDescription darkMode={darkMode}>
+              Here are your skills with the highest completion rate among all
+              categories.
+            </SkillsDescription>
+            <SeeMoreButton darkMode={darkMode} onClick={toggleExpandSkills}>
+              {expandedSkills ? "See less" : "See more"}
+              {expandedSkills ? "↑" : "→"}
+            </SeeMoreButton>
+          </div>
+
+          {!expandedSkills ? (
+            <SkillsChartContainer expanded={false}>
+              <SkillsRadarChart
+                skillsFilter={[
+                  "prog",
+                  "go",
+                  "back-end",
+                  "front-end",
+                  "js",
+                  "html",
+                ]}
+                darkMode={darkMode}
+                chartOptions={getChartOptions(darkMode)}
+              />
+            </SkillsChartContainer>
+          ) : (
+            <SkillsChartContainer expanded={true}>
+              <div>
+                <ChartTitle darkMode={darkMode}>Programming Skills</ChartTitle>
+                <ChartWrapper>
+                  <SkillsRadarChart
+                    skillsFilter={[
+                      "prog",
+                      "algo",
+                      "game",
+                      "stats",
+                      "tcp",
+                      "back-end",
+                      "front-end",
+                    ]}
+                    darkMode={darkMode}
+                    chartOptions={getChartOptions(darkMode)}
+                  />
+                </ChartWrapper>
+              </div>
+              <div>
+                <ChartTitle darkMode={darkMode}>Technology Skills</ChartTitle>
+                <ChartWrapper>
+                  <SkillsRadarChart
+                    skillsFilter={[
+                      "go",
+                      "js",
+                      "html",
+                      "css",
+                      "sql",
+                      "docker",
+                      "unix",
+                    ]}
+                    darkMode={darkMode}
+                    chartOptions={getChartOptions(darkMode)}
+                  />
+                </ChartWrapper>
+              </div>
+            </SkillsChartContainer>
+          )}
         </UserSkillsCard>
       </DashboardGrid>
     </ProfileContainer>
