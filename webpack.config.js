@@ -6,7 +6,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
-    publicPath: process.env.NODE_ENV === "production" ? "/Graphql/" : "/",
+    publicPath: "/",
   },
   module: {
     rules: [
