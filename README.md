@@ -94,7 +94,6 @@ This application can be deployed to various hosting platforms:
 
 - GitHub Pages
 - Netlify
-- Vercel
 - Any static hosting service
 
 ## License

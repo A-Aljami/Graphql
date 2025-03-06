@@ -8,8 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack serve --mode development --open",
     "build": "webpack --mode production",
-    "dev": "webpack --mode development",
-    "vercel-build": "npm run build"
+    "dev": "webpack --mode development"
   },
   "keywords": [],
   "author": "",
