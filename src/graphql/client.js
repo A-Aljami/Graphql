@@ -15,18 +15,63 @@ const httpLink = createHttpLink({
 // Error handling link
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
-    graphQLErrors.forEach(({ message, locations, path }) => {
+    graphQLErrors.forEach(({ message, locations, path, extensions }) => {
       console.error(
         `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
       );
+
+      // Handle specific GraphQL errors
+      if (extensions && extensions.code) {
+        switch (extensions.code) {
+          case "FORBIDDEN":
+          case "BAD_USER_INPUT":
+            window.location.href = "/error/400";
+            break;
+          case "NOT_FOUND":
+            window.location.href = "/error/404";
+            break;
+          case "INTERNAL_SERVER_ERROR":
+            window.location.href = "/error/500";
+            break;
+          default:
+            // For other GraphQL errors, we can log them but don't need to redirect
+            break;
+        }
+      }
     });
   }
+
   if (networkError) {
     console.error(`[Network error]: ${networkError}`);
-    // If we get a 401 Unauthorized error, the token might be expired
-    if (networkError.statusCode === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+
+    // Handle different network error status codes
+    if (networkError.statusCode) {
+      switch (networkError.statusCode) {
+        case 400:
+          window.location.href = "/error/400";
+          break;
+        case 401:
+          // If we get a 401 Unauthorized error, the token might be expired
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          break;
+        case 404:
+          window.location.href = "/error/404";
+          break;
+        case 500:
+        case 502:
+        case 503:
+        case 504:
+          window.location.href = "/error/500";
+          break;
+        default:
+          // For other network errors, redirect to a generic error page
+          window.location.href = "/error/500";
+          break;
+      }
+    } else {
+      // If there's no status code (e.g., network is down), redirect to 500 error
+      window.location.href = "/error/500";
     }
   }
 });

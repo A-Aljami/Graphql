@@ -4,15 +4,19 @@ import { BrowserRouter } from "react-router-dom";
 import { ApolloProvider } from "@apollo/client";
 import App from "./App";
 import { client } from "./graphql/client";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { Error500 } from "./components/ErrorPages";
 
 const root = createRoot(document.getElementById("root"));
 
 root.render(
   <React.StrictMode>
-    <ApolloProvider client={client}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ApolloProvider>
+    <ErrorBoundary fallback={<Error500 />}>
+      <ApolloProvider client={client}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ApolloProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );
