@@ -16,7 +16,14 @@
             l.pathname.slice(0, -1) + decoded + l.hash
           );
         }
-      })(window.location);</script><style>* {
+      })(window.location);</script><script>// Redirect all 404s to index.html
+      (function () {
+        if (window.location.pathname.indexOf("/Graphql") === 0) {
+          // Already has the correct base path
+          return;
+        }
+        window.location.href = "/Graphql" + window.location.pathname;
+      })();</script><style>* {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
