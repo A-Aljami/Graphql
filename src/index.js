@@ -13,7 +13,7 @@ root.render(
   <React.StrictMode>
     <ErrorBoundary fallback={<Error500 />}>
       <ApolloProvider client={client}>
-        <BrowserRouter basename="/Graphql">
+        <BrowserRouter basename="/">
           <App />
         </BrowserRouter>
       </ApolloProvider>

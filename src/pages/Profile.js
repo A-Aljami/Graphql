@@ -3,31 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import styled from "styled-components";
 import { useAuth } from "../utils/AuthContext";
-import {
-  Chart as ChartJS,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import SkillsRadarChart from "../components/SkillsRadarChart";
+import SVGRadarChart from "../components/SVGRadarChart";
+import SVGLineChart from "../components/SVGLineChart";
 import {
   GET_USER_INFO,
   GET_AUDIT_RATIO,
+  GET_USER_SKILLS,
   GET_LATEST_PROGRESS,
 } from "../graphql/queries";
-
-// Register Chart.js components
-ChartJS.register(
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend
-);
 
 // Theme styling
 const ProfileContainer = styled.div`
@@ -390,6 +373,13 @@ const Profile = () => {
     error: auditError,
   } = useQuery(GET_AUDIT_RATIO);
 
+  // Fetch skills data
+  const {
+    data: skillsData,
+    loading: skillsLoading,
+    error: skillsError,
+  } = useQuery(GET_USER_SKILLS);
+
   // Fetch latest progress data
   const {
     data: progressData,
@@ -472,6 +462,37 @@ const Profile = () => {
       .replace(",", "");
   };
 
+  // Process skills data from transactions
+  const processSkillsData = (transactions) => {
+    if (!transactions || transactions.length === 0) {
+      return [];
+    }
+
+    const skillsMap = {};
+
+    transactions.forEach((transaction) => {
+      const type = transaction.type || "";
+      const createdAt = new Date(transaction.createdAt);
+
+      if (type.startsWith("skill_")) {
+        const skillName = type.replace("skill_", "");
+
+        if (
+          !skillsMap[skillName] ||
+          new Date(skillsMap[skillName].createdAt) < createdAt
+        ) {
+          skillsMap[skillName] = {
+            name: skillName,
+            level: transaction.amount,
+            createdAt: transaction.createdAt,
+          };
+        }
+      }
+    });
+
+    return Object.values(skillsMap);
+  };
+
   // Format project path to show only the last part
   const formatProjectPath = (path) => {
     if (!path) return "";
@@ -488,63 +509,11 @@ const Profile = () => {
     return formattedPath;
   };
 
-  // Update chart options based on theme
-  const getChartOptions = (isDarkMode) => {
-    return {
-      scales: {
-        r: {
-          angleLines: {
-            display: true,
-            color: isDarkMode ? "#333" : "#e0e0e0",
-          },
-          grid: {
-            color: isDarkMode ? "#333" : "#e0e0e0",
-          },
-          pointLabels: {
-            font: {
-              size: 12,
-            },
-            color: isDarkMode ? "#ddd" : "#333",
-          },
-          suggestedMin: 0,
-          suggestedMax: 100,
-          ticks: {
-            display: false,
-            stepSize: 20,
-            backdropColor: "transparent",
-          },
-        },
-      },
-      plugins: {
-        legend: {
-          display: false,
-        },
-        tooltip: {
-          backgroundColor: isDarkMode
-            ? "rgba(30, 30, 30, 0.9)"
-            : "rgba(255, 255, 255, 0.9)",
-          titleColor: isDarkMode ? "#fff" : "#333",
-          bodyColor: isDarkMode ? "#ddd" : "#666",
-          borderColor: isDarkMode ? "#444" : "#e0e0e0",
-          borderWidth: 1,
-          padding: 10,
-          boxPadding: 3,
-          callbacks: {
-            label: function (context) {
-              return `${context.raw}%`;
-            },
-          },
-        },
-      },
-      maintainAspectRatio: false,
-    };
-  };
-
-  // Get the latest project from progress data
+  // Get the latest project
   const latestProgress = progressData?.user[0]?.progresses[0];
 
   // Loading state
-  if (userLoading || auditLoading || progressLoading) {
+  if (userLoading || auditLoading || skillsLoading || progressLoading) {
     return (
       <MainLayout>
         <ContentArea darkMode={darkMode}>
@@ -596,7 +565,7 @@ const Profile = () => {
   }
 
   // Error state
-  if (userError || auditError || progressError) {
+  if (userError || auditError || skillsError || progressError) {
     return (
       <MainLayout>
         <ContentArea darkMode={darkMode}>
@@ -723,17 +692,19 @@ const Profile = () => {
 
             {!expandedSkills ? (
               <SkillsChartContainer expanded={false}>
-                <SkillsRadarChart
-                  skillsFilter={[
-                    "prog",
-                    "go",
-                    "back-end",
-                    "front-end",
-                    "js",
-                    "html",
-                  ]}
+                <SVGRadarChart
+                  data={processSkillsData(skillsData?.transaction || []).filter(
+                    (skill) =>
+                      [
+                        "prog",
+                        "go",
+                        "back-end",
+                        "front-end",
+                        "js",
+                        "html",
+                      ].includes(skill.name)
+                  )}
                   darkMode={darkMode}
-                  chartOptions={getChartOptions(darkMode)}
                 />
               </SkillsChartContainer>
             ) : (
@@ -743,36 +714,42 @@ const Profile = () => {
                     Programming Skills
                   </ChartTitle>
                   <ChartWrapper>
-                    <SkillsRadarChart
-                      skillsFilter={[
-                        "prog",
-                        "algo",
-                        "game",
-                        "stats",
-                        "tcp",
-                        "back-end",
-                        "front-end",
-                      ]}
+                    <SVGRadarChart
+                      data={processSkillsData(
+                        skillsData?.transaction || []
+                      ).filter((skill) =>
+                        [
+                          "prog",
+                          "algo",
+                          "game",
+                          "stats",
+                          "tcp",
+                          "back-end",
+                          "front-end",
+                        ].includes(skill.name)
+                      )}
                       darkMode={darkMode}
-                      chartOptions={getChartOptions(darkMode)}
                     />
                   </ChartWrapper>
                 </div>
                 <div>
                   <ChartTitle darkMode={darkMode}>Technology Skills</ChartTitle>
                   <ChartWrapper>
-                    <SkillsRadarChart
-                      skillsFilter={[
-                        "go",
-                        "js",
-                        "html",
-                        "css",
-                        "sql",
-                        "docker",
-                        "unix",
-                      ]}
+                    <SVGRadarChart
+                      data={processSkillsData(
+                        skillsData?.transaction || []
+                      ).filter((skill) =>
+                        [
+                          "go",
+                          "js",
+                          "html",
+                          "css",
+                          "sql",
+                          "docker",
+                          "unix",
+                        ].includes(skill.name)
+                      )}
                       darkMode={darkMode}
-                      chartOptions={getChartOptions(darkMode)}
                     />
                   </ChartWrapper>
                 </div>
