@@ -3,6 +3,30 @@
  */
 
 /**
+ * Check if user is authenticated
+ * @returns {boolean} - Whether the user is authenticated
+ */
+const isAuthenticated = () => {
+  const token = localStorage.getItem("token");
+  return !!token;
+};
+
+/**
+ * Get the base URL for the current environment
+ * @returns {string} - The base URL
+ */
+const getBaseUrl = () => {
+  if (process.env.NODE_ENV === "development") {
+    return "";
+  }
+  // Check if we're on GitHub Pages
+  if (window.location.hostname.includes("github.io")) {
+    return "/Graphql";
+  }
+  return "";
+};
+
+/**
  * Handle API errors and redirect to appropriate error pages
  * @param {Error} error - The error object
  * @param {boolean} redirect - Whether to redirect to error pages (default: true)
@@ -26,29 +50,37 @@ export const handleApiError = (error, redirect = true) => {
     statusCode = 400;
   }
 
+  // Get the base URL for redirects
+  const baseUrl = getBaseUrl();
+
   // Redirect to appropriate error page if redirect is true
   if (redirect) {
     switch (statusCode) {
       case 400:
-        window.location.href = "/error/400";
+        window.location.href = `${baseUrl}/error/400`;
         break;
       case 401:
         // For auth errors, clear token and redirect to login
         localStorage.removeItem("token");
-        window.location.href = "/login";
+        window.location.href = `${baseUrl}/login`;
         break;
       case 404:
-        window.location.href = "/error/404";
+        // For 404 errors, check authentication status
+        if (isAuthenticated()) {
+          window.location.href = `${baseUrl}/`; // Redirect to home if authenticated
+        } else {
+          window.location.href = `${baseUrl}/login`; // Redirect to login if not authenticated
+        }
         break;
       case 500:
       case 502:
       case 503:
       case 504:
-        window.location.href = "/error/500";
+        window.location.href = `${baseUrl}/error/500`;
         break;
       default:
         // For other errors, redirect to 500 page
-        window.location.href = "/error/500";
+        window.location.href = `${baseUrl}/error/500`;
         break;
     }
   }

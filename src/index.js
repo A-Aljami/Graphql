@@ -9,11 +9,24 @@ import { Error500 } from "./components/ErrorPages";
 
 const root = createRoot(document.getElementById("root"));
 
+// Get the base URL based on the environment
+const getBasename = () => {
+  if (process.env.NODE_ENV === "development") {
+    return "";
+  }
+  // Check if we're on GitHub Pages
+  if (window.location.hostname.includes("github.io")) {
+    return "/Graphql";
+  }
+  return "";
+};
+
+// Render the app
 root.render(
   <React.StrictMode>
     <ErrorBoundary fallback={<Error500 />}>
       <ApolloProvider client={client}>
-        <BrowserRouter basename="/Graphql">
+        <BrowserRouter basename={getBasename()}>
           <App />
         </BrowserRouter>
       </ApolloProvider>

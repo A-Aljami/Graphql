@@ -5,7 +5,8 @@ import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import AuditDemo from "./pages/AuditDemo";
 import { AuthProvider, useAuth } from "./utils/AuthContext";
-import { Error404, Error400, Error500 } from "./components/ErrorPages";
+import { Error400, Error500 } from "./components/ErrorPages";
+import NotFound from "./components/ErrorPages/NotFound";
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -24,31 +25,66 @@ const AppContainer = styled.div`
   flex-direction: column;
 `;
 
+// Main app routes component
+const AppRoutes = () => {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <Routes>
+      {/* Public routes */}
+      <Route
+        path="/login"
+        element={
+          isAuthenticated ? <Navigate to="/profile" replace /> : <Login />
+        }
+      />
+
+      {/* Protected routes */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/audit-demo"
+        element={
+          <ProtectedRoute>
+            <AuditDemo />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Home route */}
+      <Route
+        path="/"
+        element={
+          isAuthenticated ? (
+            <Navigate to="/profile" replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      {/* Error routes */}
+      <Route path="/error/400" element={<Error400 />} />
+      <Route path="/error/500" element={<Error500 />} />
+
+      {/* Catch-all route for 404 errors */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
+// Main App component
 const App = () => {
   return (
     <AuthProvider>
       <AppContainer>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/audit-demo" element={<AuditDemo />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
-
-          {/* Error routes */}
-          <Route path="/error/400" element={<Error400 />} />
-          <Route path="/error/404" element={<Error404 />} />
-          <Route path="/error/500" element={<Error500 />} />
-
-          {/* Catch-all route for 404 errors */}
-          <Route path="*" element={<Error404 />} />
-        </Routes>
+        <AppRoutes />
       </AppContainer>
     </AuthProvider>
   );
